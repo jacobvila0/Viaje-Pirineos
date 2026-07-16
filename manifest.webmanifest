@@ -1,0 +1,17 @@
+{
+  "name": "Pirineos 2026 · Tredòs",
+  "short_name": "Pirineos 2026",
+  "description": "Plan compartido del viaje a Tredòs, del 12 al 16 de agosto de 2026.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f7f8f3",
+  "theme_color": "#123e34",
+  "icons": [
+    {
+      "src": "favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

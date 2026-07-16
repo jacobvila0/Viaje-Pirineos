@@ -1,0 +1,17 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Pirineos 2026//Viaje Tredos//ES
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+BEGIN:VEVENT
+UID:pirineos-2026-tredos@viaje.local
+DTSTAMP:20260716T172140Z
+DTSTART;TZID=Europe/Madrid:20260812T070000
+DTEND;TZID=Europe/Madrid:20260816T233000
+SUMMARY:Viaje a los Pirineos · Tredòs 2026
+LOCATION:Tredòs\, Val d'Aran\, Lleida
+DESCRIPTION:Viaje del grupo desde Vallada a Tredòs. Colomèrs\, rafting en Llavorsí\, Aran Park\, Mirador de Beret\, Arties y vuelta por Andorra.
+URL:https://maps.app.goo.gl/8vtCzXsbPc4HfmRR9
+STATUS:CONFIRMED
+END:VEVENT
+END:VCALENDAR
