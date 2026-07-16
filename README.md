@@ -7,9 +7,9 @@ Landing estática para consultar el viaje del **12 al 16 de agosto de 2026** des
 - Cuenta atrás automática hasta la salida del 12 de agosto a las 07:00.
 - Durante el viaje, cambia a **“Día X de 5”** y muestra el plan de esa jornada.
 - Itinerario completo, participantes, coches y enlaces compartidos.
-- Mapa interactivo con todas las paradas.
+- Mapa interactivo con todas las paradas, incluido el Mercadona de Vielha antes del check-in.
 - Botón de ubicación en tiempo real, visible únicamente en el dispositivo del usuario.
-- Simulador de presupuesto y checklist personal guardados en el navegador.
+- Simulador de presupuesto con el alojamiento precargado a 1.034 € y checklist personal guardados en el navegador.
 - Archivo de calendario `.ics`.
 - Diseño responsive con temática de montaña.
 
@@ -32,6 +32,7 @@ La web está concentrada en `index.html` para que sea fácil de mantener.
 - Cuenta atrás y texto diario: busca `const tripDays`.
 - Participantes y coches: busca la sección `id="grupo"`.
 - Puntos del mapa: busca `const places`.
+- Coste del alojamiento: busca `accommodation: 1034`.
 - Valores iniciales del presupuesto: busca `budgetDefaults`.
 
 ## Notas de privacidad
@@ -42,4 +43,4 @@ La web está concentrada en `index.html` para que sea fácil de mantener.
 
 ## Dependencias
 
-El mapa utiliza Leaflet 1.9.4 y teselas de OpenStreetMap cargadas desde Internet. El resto de la página funciona sin compilación ni backend.
+El mapa utiliza Leaflet 1.9.4 y teselas de OpenStreetMap cargadas desde Internet. La hoja de estilos usa el hash oficial de Leaflet 1.9.4; el mapa también recalcula su tamaño al cargar y al cambiar el ancho de la pantalla. El resto de la página funciona sin compilación ni backend.

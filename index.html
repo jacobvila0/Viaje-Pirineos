@@ -14,7 +14,7 @@
   <link
     rel="stylesheet"
     href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-    integrity="sha256-p4NxAoJBhIINfQ3ynhbr0RMJkDqHLptJRAKsD3pL6A4="
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
     crossorigin=""
   >
   <style>
@@ -546,7 +546,18 @@
       background: rgba(255,255,255,.08);
       box-shadow: 0 20px 60px rgba(0,0,0,.18);
     }
-    #map { height: 590px; background: #dbe8e3; }
+    .map-card {
+      min-height: 700px;
+      display: flex;
+      flex-direction: column;
+    }
+    #map {
+      width: 100%;
+      min-height: 610px;
+      flex: 1 1 auto;
+      background: #dbe8e3;
+      isolation: isolate;
+    }
     .map-toolbar {
       display: flex;
       flex-wrap: wrap;
@@ -562,7 +573,8 @@
     .map-status { color: var(--muted); font-size: .82rem; }
     .map-fallback {
       display: none;
-      min-height: 590px;
+      min-height: 610px;
+      flex: 1 1 auto;
       place-items: center;
       padding: 30px;
       text-align: center;
@@ -570,9 +582,23 @@
       background: var(--moss-100);
     }
 
-    .places-panel { padding: 18px; }
+    .places-panel {
+      min-height: 700px;
+      max-height: 700px;
+      display: flex;
+      flex-direction: column;
+      padding: 18px;
+    }
     .places-panel h3 { margin: 4px 4px 16px; font-size: 1.05rem; }
-    .place-list { display: grid; gap: 9px; }
+    .place-list {
+      min-height: 0;
+      display: grid;
+      gap: 9px;
+      overflow-y: auto;
+      padding-right: 4px;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255,255,255,.28) transparent;
+    }
     .place-button {
       width: 100%;
       border: 1px solid rgba(255,255,255,.12);
@@ -589,6 +615,13 @@
       transition: background .18s ease, transform .18s ease;
     }
     .place-button:hover { background: rgba(255,255,255,.12); transform: translateX(2px); }
+    .place-button.active {
+      color: var(--pine-950);
+      background: rgba(255,255,255,.94);
+      border-color: rgba(255,255,255,.94);
+    }
+    .place-button.active .place-copy strong { color: var(--pine-950); }
+    .place-button.active .place-copy > span { color: var(--muted); }
     .place-number {
       width: 36px;
       height: 36px;
@@ -607,6 +640,45 @@
       color: rgba(255,255,255,.55);
       font-size: .78rem;
     }
+
+    /* Structural fallback for Leaflet. The official stylesheet still supplies the full skin,
+       but these rules keep tiles and controls correctly positioned if the CDN CSS is delayed. */
+    .leaflet-container { position: relative; overflow: hidden; outline: 0; }
+    .leaflet-pane,
+    .leaflet-tile,
+    .leaflet-marker-icon,
+    .leaflet-marker-shadow,
+    .leaflet-tile-container,
+    .leaflet-pane > svg,
+    .leaflet-pane > canvas,
+    .leaflet-zoom-box,
+    .leaflet-image-layer,
+    .leaflet-layer { position: absolute; left: 0; top: 0; }
+    .leaflet-container img.leaflet-tile,
+    .leaflet-container .leaflet-marker-pane img,
+    .leaflet-container .leaflet-shadow-pane img { max-width: none !important; max-height: none !important; }
+    .leaflet-pane { z-index: 400; }
+    .leaflet-tile-pane { z-index: 200; }
+    .leaflet-overlay-pane { z-index: 400; }
+    .leaflet-shadow-pane { z-index: 500; }
+    .leaflet-marker-pane { z-index: 600; }
+    .leaflet-tooltip-pane { z-index: 650; }
+    .leaflet-popup-pane { z-index: 700; }
+    .leaflet-map-pane canvas { z-index: 100; }
+    .leaflet-map-pane svg { z-index: 200; }
+    .leaflet-tile { visibility: hidden; user-select: none; -webkit-user-drag: none; }
+    .leaflet-tile-loaded { visibility: inherit; }
+    .leaflet-top, .leaflet-bottom { position: absolute; z-index: 1000; pointer-events: none; }
+    .leaflet-top { top: 0; }
+    .leaflet-right { right: 0; }
+    .leaflet-bottom { bottom: 0; }
+    .leaflet-left { left: 0; }
+    .leaflet-control { position: relative; z-index: 800; float: left; clear: both; pointer-events: auto; }
+    .leaflet-right .leaflet-control { float: right; }
+    .leaflet-top .leaflet-control { margin-top: 10px; }
+    .leaflet-bottom .leaflet-control { margin-bottom: 10px; }
+    .leaflet-left .leaflet-control { margin-left: 10px; }
+    .leaflet-right .leaflet-control { margin-right: 10px; }
 
     .leaflet-popup-content-wrapper { border-radius: 14px; box-shadow: 0 12px 35px rgba(8,37,31,.2); }
     .leaflet-popup-content { margin: 14px 16px; font-family: inherit; }
@@ -919,7 +991,9 @@
       .quick-stats { grid-template-columns: repeat(2, 1fr); }
       .section-heading { grid-template-columns: 1fr; align-items: start; }
       .map-layout, .accommodation-grid, .people-grid, .tools-grid { grid-template-columns: 1fr; }
-      .places-panel { max-height: none; }
+      .map-card, .places-panel { min-height: auto; max-height: none; }
+      #map, .map-fallback { height: 520px; min-height: 520px; flex: none; }
+      .place-list { overflow: visible; padding-right: 0; }
       .cars-grid, .links-grid, .safety-grid { grid-template-columns: repeat(2, 1fr); }
     }
 
@@ -991,7 +1065,7 @@
       <div class="hero-grid">
         <div>
           <p class="eyebrow">12–16 agosto · Tredòs · Val d'Aran</p>
-          <h1>A Vorem en los Pirineos</h1>
+          <h1>Avorem que fem por los Pirineos</h1>
           <p class="hero-copy">Doce amigos, tres coches y cinco días entre lagos glaciares, rafting, pueblos de piedra y carreteras de montaña.</p>
           <div class="hero-actions">
             <a class="button button-primary" href="#plan">
@@ -1051,7 +1125,7 @@
       <article class="stat">
         <div class="stat-icon" aria-hidden="true">🏡</div>
         <strong>Casa Bruisha</strong>
-        <span>Base en el centro de Tredòs</span>
+        <span>1.034 € total · 86,17 € por persona</span>
       </article>
     </div>
 
@@ -1076,15 +1150,16 @@
             <div><div class="day-badge">1</div></div>
             <div>
               <p class="day-date">Miércoles · 12 de agosto</p>
-              <h3 class="day-title">Carretera, Casa Bruisha y paseo por Arties</h3>
-              <p class="day-summary">Día de llegada sin prisas: carretera, compra inicial, reparto de habitaciones y primer paseo por el valle.</p>
+              <h3 class="day-title">Carretera, compra en Vielha, Casa Bruisha y Arties</h3>
+              <p class="day-summary">Día de llegada: carretera, compra común antes de subir a Tredòs, reparto de habitaciones y primer paseo por el valle.</p>
               <div class="day-slots">
                 <div class="slot"><time>07:00</time><p>Salida conjunta desde Vallada. Conviene repostar y revisar presiones el día anterior.</p></div>
                 <div class="slot"><time>Ruta</time><p>Aproximadamente 7 horas con las dos paradas de descanso ya previstas.</p></div>
-                <div class="slot"><time>16:00</time><p>Entrada en Casa Bruisha, reparto de camas y organización de la compra.</p></div>
+                <div class="slot"><time>Antes de subir</time><p>Parada en el <a href="https://www.google.com/maps/search/?api=1&amp;query=Mercadona+Vielha" target="_blank" rel="noopener noreferrer">Mercadona de Vielha ↗</a> para hacer la compra común antes de continuar hacia Tredòs.</p></div>
+                <div class="slot"><time>16:00</time><p>Entrada en Casa Bruisha, descarga de la compra y reparto de camas.</p></div>
                 <div class="slot"><time>Tarde</time><p>Paseo por Arties, cena tranquila y preparación de mochilas para Colomèrs.</p></div>
               </div>
-              <div class="tags"><span class="tag">🚗 Viaje</span><span class="tag">🏡 Check-in 16:00</span><span class="tag">🏘️ Arties</span></div>
+              <div class="tags"><span class="tag">🚗 Viaje</span><span class="tag">🛒 Mercadona Vielha</span><span class="tag">🏡 Check-in 16:00</span><span class="tag">🏘️ Arties</span></div>
             </div>
           </article>
 
@@ -1162,6 +1237,7 @@
             <p class="eyebrow">Mapa del viaje</p>
             <h2>Todo el valle, a un vistazo.</h2>
           </div>
+          <p>El mapa incluye Vallada, la parada en el Mercadona de Vielha, la casa de forma aproximada —sin publicar una dirección privada—, las actividades y la vuelta por Andorra. El botón de ubicación funciona en GitHub Pages porque usa HTTPS.</p>
         </div>
 
         <div class="map-layout">
@@ -1199,7 +1275,7 @@
             <p class="eyebrow" style="color:var(--pine-700)">Alojamiento</p>
             <h2>Base camp: Casa Bruisha.</h2>
           </div>
-          <p>La casa anunciada admite hasta 13 personas, por lo que encaja con el grupo actual de 12. La ubicación del mapa es el centro de Tredòs, no la dirección exacta.</p>
+          <p>El alojamiento cuesta 1.034 € en total: entre 12 personas son 86,17 € por cabeza. La ubicación del mapa es el centro de Tredòs, no la dirección exacta.</p>
         </div>
 
         <div class="accommodation-grid">
@@ -1207,16 +1283,18 @@
             <div class="house-content">
               <p class="eyebrow">Tredòs · Naut Aran</p>
               <h3>Casa Bruisha</h3>
-              <p>Una casa amplia de montaña para hacer vida en grupo, preparar las rutas y descansar entre actividad y actividad.</p>
+              <p>Una casa amplia de montaña para hacer vida en grupo, preparar las rutas y descansar entre actividad y actividad. Total del alojamiento: 1.034 €.</p>
               <a class="button button-primary" href="https://www.airbnb.es/rooms/1620118910981269941?unique_share_id=2f1abfa7-247d-4e59-b3a0-e0b672881722&viralityEntryPoint=1&s=76" target="_blank" rel="noopener noreferrer">Ver alojamiento en Airbnb ↗</a>
             </div>
           </article>
           <div class="house-facts">
+            <article class="fact-card"><strong>1.034 € total</strong><span>Precio completo del alojamiento</span></article>
+            <article class="fact-card"><strong>86,17 € / persona</strong><span>Repartido entre los 12 integrantes</span></article>
             <article class="fact-card"><strong>13 viajeros</strong><span>Capacidad máxima anunciada</span></article>
             <article class="fact-card"><strong>5 dormitorios</strong><span>Reparto de camas por acordar</span></article>
             <article class="fact-card"><strong>8 camas</strong><span>Conviene decidir parejas y habitaciones antes</span></article>
             <article class="fact-card"><strong>4 baños</strong><span>Turnos fáciles incluso siendo 12</span></article>
-            <article class="fact-card"><strong>Entrada 16:00</strong><span>La llegada puede incluir comida o compra previa</span></article>
+            <article class="fact-card"><strong>Entrada 16:00</strong><span>Primero se hará la compra en Mercadona Vielha</span></article>
             <article class="fact-card"><strong>Salida 10:00</strong><span>Importante para el día de Andorra</span></article>
           </div>
         </div>
@@ -1276,6 +1354,7 @@
             <p class="eyebrow" style="color:var(--pine-700)">Herramientas rápidas</p>
             <h2>Números y mochila, bajo control.</h2>
           </div>
+          <p>El simulador y la checklist se guardan únicamente en el dispositivo desde el que se usan. Sirven para estimar y preparar, no como base de datos compartida.</p>
         </div>
 
         <div class="tools-grid">
@@ -1283,24 +1362,26 @@
             <h3>Simulador de presupuesto</h3>
             <div class="form-grid">
               <div class="field"><label for="participants">Personas</label><div class="input-wrap"><input id="participants" type="number" min="1" step="1" value="12"><span>pers.</span></div></div>
-              <div class="field"><label for="accommodation">Alojamiento total</label><div class="input-wrap"><input id="accommodation" type="number" min="0" step="1" value="0"><span>€</span></div></div>
+              <div class="field"><label for="accommodation">Alojamiento total</label><div class="input-wrap"><input id="accommodation" type="number" min="0" step="1" value="1034"><span>€</span></div></div>
               <div class="field"><label for="fuel">Combustible + peajes</label><div class="input-wrap"><input id="fuel" type="number" min="0" step="1" value="0"><span>€</span></div></div>
               <div class="field"><label for="food">Compra + comidas</label><div class="input-wrap"><input id="food" type="number" min="0" step="1" value="0"><span>€</span></div></div>
               <div class="field"><label for="rafting">Rafting por persona</label><div class="input-wrap"><input id="rafting" type="number" min="0" step="1" value="37"><span>€/p.</span></div></div>
               <div class="field"><label for="aranPark">Aran Park por persona</label><div class="input-wrap"><input id="aranPark" type="number" min="0" step="1" value="17"><span>€/p.</span></div></div>
+              <div class="field"><label for="other">Otros gastos</label><div class="input-wrap"><input id="other" type="number" min="0" step="1" value="0"><span>€</span></div></div>
             </div>
             <div class="budget-result" aria-live="polite">
-              <div class="result-box"><span>Total estimado</span><strong id="budgetTotal">0,00 €</strong></div>
-              <div class="result-box"><span>Por persona</span><strong id="budgetPerPerson">0,00 €</strong></div>
+              <div class="result-box"><span>Total estimado</span><strong id="budgetTotal">1.682,00 €</strong></div>
+              <div class="result-box"><span>Por persona</span><strong id="budgetPerPerson">140,17 €</strong></div>
             </div>
             <div class="card-actions"><button class="button button-soft button-small" type="button" id="resetBudget">Restablecer</button></div>
-            <p class="local-note">Los 37 € de rafting son el precio mostrado en el enlace consultado; puede variar al reservar.</p>
+            <p class="local-note">El alojamiento está precargado con 1.034 € —86,17 € por persona si sois 12—. Los precios de las actividades pueden variar al reservar.</p>
           </article>
 
           <article class="checklist-card" id="checklist">
             <h3>Checklist personal</h3>
             <div class="checklist" id="checklistItems">
               <label class="check-item"><input type="checkbox" data-check="documentacion"><span>DNI, tarjeta sanitaria y algo de efectivo</span></label>
+              <label class="check-item"><input type="checkbox" data-check="compra"><span>Lista de compra común y responsables para Mercadona</span></label>
               <label class="check-item"><input type="checkbox" data-check="montana"><span>Botas o zapatillas de montaña con buen agarre</span></label>
               <label class="check-item"><input type="checkbox" data-check="capas"><span>Chubasquero, forro fino y una capa de abrigo</span></label>
               <label class="check-item"><input type="checkbox" data-check="agua"><span>Botella reutilizable y comida para la ruta</span></label>
@@ -1311,7 +1392,7 @@
               <label class="check-item"><input type="checkbox" data-check="offline"><span>Ruta descargada y mapas sin conexión</span></label>
             </div>
             <div class="check-progress"><span id="checkProgressBar"></span></div>
-            <span class="check-count" id="checkCount">0 de 9 completadas</span>
+            <span class="check-count" id="checkCount">0 de 10 completadas</span>
             <div class="card-actions"><button class="button button-soft button-small" type="button" id="resetChecklist">Desmarcar todo</button></div>
           </article>
         </div>
@@ -1325,11 +1406,14 @@
             <p class="eyebrow" style="color:var(--pine-700)">Enlaces del grupo</p>
             <h2>Todo a un toque.</h2>
           </div>
-          <p>Accesos directos a la ruta, el alojamiento y las actividades compartidas.</p>
+          <p>Accesos directos a la ruta, la compra en Vielha, el alojamiento y las actividades compartidas.</p>
         </div>
         <div class="links-grid">
           <a class="link-card" href="https://maps.app.goo.gl/8vtCzXsbPc4HfmRR9" target="_blank" rel="noopener noreferrer">
-            <div class="link-card-icon">🚗</div><div><h3>Vallada → Tredòs</h3><p>Ruta compartida de ida en Google Maps.</p><span class="go">Abrir ruta ↗</span></div>
+            <div class="link-card-icon">🚗</div><div><h3>Vallada → Tredòs</h3><p>Ruta compartida de ida; al llegar al valle, parada previa en Mercadona Vielha.</p><span class="go">Abrir ruta ↗</span></div>
+          </a>
+          <a class="link-card" href="https://www.google.com/maps/search/?api=1&amp;query=Mercadona+Vielha" target="_blank" rel="noopener noreferrer">
+            <div class="link-card-icon">🛒</div><div><h3>Mercadona Vielha</h3><p>Parada para la compra común antes del check-in.</p><span class="go">Abrir ubicación ↗</span></div>
           </a>
           <a class="link-card" href="https://www.airbnb.es/rooms/1620118910981269941?unique_share_id=2f1abfa7-247d-4e59-b3a0-e0b672881722&viralityEntryPoint=1&s=76" target="_blank" rel="noopener noreferrer">
             <div class="link-card-icon">🏡</div><div><h3>Casa Bruisha</h3><p>Alojamiento del grupo en Tredòs.</p><span class="go">Abrir Airbnb ↗</span></div>
@@ -1369,7 +1453,7 @@
 
   <footer>
     <div class="container footer-row">
-      <p>Jacob Vila Ferrero · Viaje a Tredòs · 12–16 de agosto de 2026.</p>
+      <p>Hecho para el viaje a Tredòs · 12–16 de agosto de 2026.</p>
       <div class="footer-links"><a href="#inicio">Volver arriba</a><a href="viaje-pirineos-2026.ics" download>Calendario</a></div>
     </div>
   </footer>
@@ -1386,7 +1470,7 @@
       'use strict';
 
       const tripDays = [
-        { date: '2026-08-12', title: 'Día 1 de 5 · Carretera, casa y Arties', note: 'Hoy toca llegar, instalarse y empezar el viaje con calma.' },
+        { date: '2026-08-12', title: 'Día 1 de 5 · Carretera, Mercadona, casa y Arties', note: 'Hoy toca llegar, hacer la compra en Vielha, instalarse y empezar el viaje con calma.' },
         { date: '2026-08-13', title: 'Día 2 de 5 · Circ de Colomèrs', note: 'Día de montaña: agua, comida, capas y salida temprana.' },
         { date: '2026-08-14', title: 'Día 3 de 5 · Rafting en Llavorsí', note: 'Bañador, toalla y ganas de remar.' },
         { date: '2026-08-15', title: 'Día 4 de 5 · Aran Park y Beret', note: 'Último día completo en la Val d\'Aran.' },
@@ -1491,9 +1575,9 @@
       });
 
       // Presupuesto local
-      const budgetDefaults = { participants: 12, accommodation: 0, fuel: 0, food: 0, rafting: 37, aranPark: 17, other: 0 };
+      const budgetDefaults = { participants: 12, accommodation: 1034, fuel: 0, food: 0, rafting: 37, aranPark: 17, other: 0 };
       const budgetIds = Object.keys(budgetDefaults);
-      const budgetStorageKey = 'pirineos-2026-budget-v1';
+      const budgetStorageKey = 'pirineos-2026-budget-v2';
 
       function loadBudget() {
         try {
@@ -1548,14 +1632,15 @@
 
       // Mapa
       const places = [
-        { id: 'tredos', n: 1, name: 'Casa / Tredòs', detail: 'Base del viaje · ubicación aproximada', coords: [42.701911, 0.914889], type: 'home', zoom: 15, url: 'https://www.google.com/maps/search/?api=1&query=Tred%C3%B2s' },
-        { id: 'banhs', n: 2, name: 'Banhs de Tredòs', detail: 'Acceso al Circ de Colomèrs', coords: [42.655115, 0.928110], type: 'accent', zoom: 14, url: 'https://www.google.com/maps/search/?api=1&query=Banhs+de+Tred%C3%B2s' },
-        { id: 'beret', n: 3, name: 'Mirador de Beret', detail: 'Panorámica del alto y medio Aran', coords: [42.708230, 0.927561], type: 'accent', zoom: 15, url: 'https://maps.app.goo.gl/n8RoyisezZYEKNNN6' },
-        { id: 'arties', n: 4, name: 'Arties', detail: 'Paseo del primer día', coords: [42.700708, 0.870825], type: '', zoom: 15, url: 'https://www.google.com/maps/search/?api=1&query=Arties+Val+d%27Aran' },
-        { id: 'aranpark', n: 5, name: 'Aran Park', detail: 'Parque de fauna · Bossòst', coords: [42.768083, 0.671522], type: '', zoom: 14, url: 'https://maps.app.goo.gl/1spV3HVNrayFD3LVA' },
-        { id: 'llavorsi', n: 6, name: 'Llavorsí', detail: 'Rafting en la Noguera Pallaresa', coords: [42.483300, 1.216700], type: 'river', zoom: 14, url: 'https://www.google.com/maps/search/?api=1&query=Llavors%C3%AD' },
-        { id: 'andorra', n: 7, name: 'Andorra la Vella', detail: 'Comida y paseo de vuelta', coords: [42.507790, 1.521090], type: 'accent', zoom: 13, url: 'https://www.google.com/maps/search/?api=1&query=Andorra+la+Vella' },
-        { id: 'vallada', n: 8, name: 'Vallada', detail: 'Salida y llegada final', coords: [38.895750, -0.691040], type: 'start', zoom: 14, url: 'https://www.google.com/maps/search/?api=1&query=Vallada+Valencia' }
+        { id: 'vallada', n: 1, name: 'Vallada', detail: 'Salida y llegada final', coords: [38.895750, -0.691040], type: 'start', zoom: 14, url: 'https://www.google.com/maps/search/?api=1&query=Vallada+Valencia' },
+        { id: 'mercadona', n: 2, name: 'Mercadona Vielha', detail: 'Compra común antes del check-in', coords: [42.703327, 0.793945], type: 'accent', zoom: 16, url: 'https://www.google.com/maps/search/?api=1&query=Mercadona+Vielha' },
+        { id: 'tredos', n: 3, name: 'Casa / Tredòs', detail: 'Base del viaje · ubicación aproximada', coords: [42.701911, 0.914889], type: 'home', zoom: 15, url: 'https://www.google.com/maps/search/?api=1&query=Tred%C3%B2s' },
+        { id: 'banhs', n: 4, name: 'Banhs de Tredòs', detail: 'Acceso al Circ de Colomèrs', coords: [42.655115, 0.928110], type: 'accent', zoom: 14, url: 'https://www.google.com/maps/search/?api=1&query=Banhs+de+Tred%C3%B2s' },
+        { id: 'beret', n: 5, name: 'Mirador de Beret', detail: 'Panorámica del alto y medio Aran', coords: [42.708230, 0.927561], type: 'accent', zoom: 15, url: 'https://maps.app.goo.gl/n8RoyisezZYEKNNN6' },
+        { id: 'arties', n: 6, name: 'Arties', detail: 'Paseo del primer día', coords: [42.700708, 0.870825], type: '', zoom: 15, url: 'https://www.google.com/maps/search/?api=1&query=Arties+Val+d%27Aran' },
+        { id: 'aranpark', n: 7, name: 'Aran Park', detail: 'Parque de fauna · Bossòst', coords: [42.768083, 0.671522], type: '', zoom: 14, url: 'https://maps.app.goo.gl/1spV3HVNrayFD3LVA' },
+        { id: 'llavorsi', n: 8, name: 'Llavorsí', detail: 'Rafting en la Noguera Pallaresa', coords: [42.483300, 1.216700], type: 'river', zoom: 14, url: 'https://www.google.com/maps/search/?api=1&query=Llavors%C3%AD' },
+        { id: 'andorra', n: 9, name: 'Andorra la Vella', detail: 'Comida y paseo de vuelta', coords: [42.507790, 1.521090], type: 'accent', zoom: 13, url: 'https://www.google.com/maps/search/?api=1&query=Andorra+la+Vella' }
       ];
 
       const placeList = $('#placeList');
@@ -1584,37 +1669,67 @@
         });
       }
 
+      function setActivePlace(placeId = '') {
+        $$('.place-button').forEach(button => button.classList.toggle('active', button.dataset.place === placeId));
+      }
+
       function openPlace(place) {
-        if (!map || !markers.has(place.id)) return;
+        if (!map || !place || !markers.has(place.id)) return;
+        map.invalidateSize();
         map.setView(place.coords, place.zoom || 14, { animate: true });
         markers.get(place.id).openPopup();
+        setActivePlace(place.id);
         $('#mapStatus').textContent = place.name;
       }
 
       function initMap() {
         if (!window.L) throw new Error('Leaflet no disponible');
-        map = L.map('map', { zoomControl: true, scrollWheelZoom: false }).setView([42.700, 0.88], 11);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        map = L.map('map', { zoomControl: true, scrollWheelZoom: false }).setView([42.700, 0.86], 11);
+        const tileLayer = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
           maxZoom: 19,
           attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>'
         }).addTo(map);
 
+        let tileErrors = 0;
+        tileLayer.on('tileerror', () => {
+          tileErrors += 1;
+          if (tileErrors === 3) $('#mapStatus').textContent = 'El mapa está tardando en cargar; prueba a recargar la página.';
+        });
+
         places.forEach(place => {
           const marker = L.marker(place.coords, { icon: markerIcon(place), title: place.name }).addTo(map);
           marker.bindPopup(`<strong>${place.name}</strong><br>${place.detail}<br><a href="${place.url}" target="_blank" rel="noopener noreferrer">Abrir en Maps ↗</a>`);
+          marker.on('click', () => {
+            setActivePlace(place.id);
+            $('#mapStatus').textContent = place.name;
+          });
           markers.set(place.id, marker);
         });
 
-        const valleyPlaces = places.filter(place => ['tredos', 'banhs', 'beret', 'arties', 'aranpark'].includes(place.id));
-        const valleyBounds = L.latLngBounds(valleyPlaces.map(place => place.coords));
-        map.fitBounds(valleyBounds, { padding: [36, 36] });
+        L.control.scale({ imperial: false, maxWidth: 120 }).addTo(map);
 
-        $('#focusValley').addEventListener('click', () => {
+        const valleyPlaces = places.filter(place => ['mercadona', 'tredos', 'banhs', 'beret', 'arties', 'aranpark'].includes(place.id));
+        const valleyBounds = L.latLngBounds(valleyPlaces.map(place => place.coords));
+        const allBounds = L.latLngBounds(places.map(place => place.coords));
+        const fitValley = () => {
+          setActivePlace();
+          map.invalidateSize();
           map.fitBounds(valleyBounds, { padding: [36, 36] });
           $('#mapStatus').textContent = 'Val d\'Aran';
-        });
+        };
+
+        requestAnimationFrame(fitValley);
+        window.addEventListener('load', () => window.setTimeout(() => map.invalidateSize(), 120), { once: true });
+        if ('ResizeObserver' in window) {
+          const resizeObserver = new ResizeObserver(() => map.invalidateSize({ pan: false }));
+          resizeObserver.observe($('#map'));
+        }
+
+        $('#focusValley').addEventListener('click', fitValley);
         $('#focusAll').addEventListener('click', () => {
-          map.fitBounds(L.latLngBounds(places.map(place => place.coords)), { padding: [28, 28] });
+          setActivePlace();
+          map.invalidateSize();
+          map.fitBounds(allBounds, { padding: [28, 28] });
           $('#mapStatus').textContent = 'Ruta completa';
         });
         $$('.place-button').forEach(button => {
